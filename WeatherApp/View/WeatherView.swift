@@ -10,6 +10,8 @@ import SwiftUI
 struct WeatherView: View {
      // MARK: - PROPERTIES
     @StateObject private var viewModel = WeatherViewModel()
+    
+    @State private var showAlert = false
 
      // MARK: - BODY
     var body: some View {
@@ -28,8 +30,24 @@ struct WeatherView: View {
                 .cornerRadius(20)
                 .ignoresSafeArea()
             } // vSTACK
+            
         } //: ZSTACK
         .background(LinearGradient(gradient: Gradient(colors: [Color.blue, Color("lightBlue")]), startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+        
+        .onReceive(viewModel.$error, perform: { error in
+            if error != nil {
+                showAlert.toggle()
+            }
+        })
+        .alert(isPresented: $showAlert, content: {
+            Alert(
+                title: Text("Error"),
+                message: Text(viewModel.error?.localizedDescription ?? ""),
+                dismissButton: .default(Text("OK"), action: {
+                    showAlert = false
+                })
+            )
+        })
     }
 }
 

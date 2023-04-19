@@ -11,7 +11,6 @@ import SwiftUI
 
 // WeatherViewModel is responsible for managing and updating the weather and forecast data, as well as the user's location.
 class WeatherViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
-    
     // Current weather data for the user's location
     @Published var weather = WeatherModel(name: "",
                                           main: Main(temp: 0,
@@ -21,16 +20,18 @@ class WeatherViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
                                                             description: "",
                                                             icon: "")],
                                           wind: Wind(speed: 0))
+    
+    @Published var error: Error?
 
     // Forecast data for the user's location
     @Published var forecast = ForecastModel(list: [])
 
     // Location manager to handle user's location
     private let locationManager = CLLocationManager()
-    
+
     // API key for OpenWeatherMap API
     let apiKey = Config.apiKey
-    
+
     // Boolean flag to prevent multiple location updates
     private var hasUpdatedLocation = false
 
@@ -48,10 +49,19 @@ class WeatherViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         if !hasUpdatedLocation {
             Task {
-                await fetchWeather(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
-                await fetchForecast(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+                do {
+                    try await fetchWeather(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+                    try await fetchForecast(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+                } catch {
+                    // Handle errors here, e.g., by displaying an alert or setting an error message
+                    DispatchQueue.main.async {
+                        self.error = error
+                    }
+                    print("Error fetching weather or forecast data: \(error.localizedDescription)")
+                }
+                
             }
-            
+
             print("DEBUG S: \(location)")
             hasUpdatedLocation = true
             locationManager.stopUpdatingLocation()
@@ -61,49 +71,61 @@ class WeatherViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     // Fetches weather data for a given latitude and longitude
     // This API can I use if I want the current weather
     // Fetches weather data for a given latitude and longitude
-    func fetchWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async {
+        @Sendable func fetchWeather(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws {
         let url = "https://api.openweathermap.org/data/2.5/weather?lat=\(latitude)&lon=\(longitude)&appid=\(apiKey)&units=metric"
-        
-        do {
-            let (data, _) = try await URLSession.shared.data(from: URL(string: url)!)
-            let decoder = JSONDecoder()
-            let decodedData = try decoder.decode(WeatherModel.self, from: data)
-            
-            DispatchQueue.main.async {
-                self.weather = decodedData
-            }
-        } catch {
-            print("Failed to fetch weather data: \(error.localizedDescription)")
-        }
-    }
-  
+
+           guard let urlObj = URL(string: url) else {
+               throw WeatherError.invalidURL
+           }
+
+           do {
+               let (data, response) = try await URLSession.shared.data(from: urlObj)
+               guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw WeatherError.serverError }
+               
+               let decoder = JSONDecoder()
+               let decodedData = try decoder.decode(WeatherModel.self, from: data)
+
+               DispatchQueue.main.async {
+                   self.weather = decodedData
+               }
+           } catch {
+               throw WeatherError.unknown(error)
+           }
+       }
+
     // Fetches forecast data for a given latitude and longitude
-    func fetchForecast(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async {
+        @Sendable func fetchForecast(latitude: CLLocationDegrees, longitude: CLLocationDegrees) async throws {
         let url = "https://api.openweathermap.org/data/2.5/forecast?lat=\(latitude)&lon=\(longitude)&appid=\(apiKey)&units=metric"
-        
-        do {
-            let (data, _) = try await URLSession.shared.data(from: URL(string: url)!)
-            let decoder = JSONDecoder()
-            let decodedData = try decoder.decode(ForecastModel.self, from: data)
-            
-            DispatchQueue.main.async {
-                self.forecast = decodedData
-            }
-        } catch {
-            print("Failed to fetch forecast data: \(error.localizedDescription)")
-        }
-    }
-    
+
+          guard let urlObj = URL(string: url) else {
+              throw WeatherError.invalidURL
+          }
+
+          do {
+              let (data, response) = try await URLSession.shared.data(from: urlObj)
+              guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw WeatherError.serverError }
+              
+              let decoder = JSONDecoder()
+              let decodedData = try decoder.decode(ForecastModel.self, from: data)
+
+              DispatchQueue.main.async {
+                  self.forecast = decodedData
+              }
+          } catch {
+              throw WeatherError.unknown(error)
+          }
+      }
+
     // This function returns the day of the week as a string
-        // for the provided date
+    // for the provided date
     func getDayOfWeek(_ date: Date) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "E"
         return dateFormatter.string(from: date)
     }
-    
+
     // This function returns an array of unique ForecastListItem objects
-        // based on the unique days of the week from the provided forecast list
+    // based on the unique days of the week from the provided forecast list
     func uniqueDays(from forecastList: [ForecastListItem]) -> [ForecastListItem] {
         var uniqueDates: Set<String> = []
         var uniqueDays: [ForecastListItem] = []
@@ -122,8 +144,6 @@ class WeatherViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
 
         return uniqueDays
     }
-
-
 
     // Returns an SF Symbol string based on the weather icon string provided by the API
     func weatherIconSF(symbol: String) -> String {
@@ -148,6 +168,4 @@ class WeatherViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
             return "exclamationmark.triangle"
         }
     }
-    
-   
 }
