@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct MuiltyDayForecast: View {
-    
+     // MARK: - PROPERTIES
     @StateObject var viewModel = WeatherViewModel()
     
+     // MARK: - BODY
     var body: some View {
         VStack(alignment: .center, spacing: 15) {
             Text("5-Day Forecast")
@@ -37,19 +38,20 @@ struct MuiltyDayForecast: View {
                         Text("\(Int(item.main.temp.rounded()))°")
                             .font(.title3)
                             .foregroundColor(.white)
-                    }
+                        
+                    }//: VSTACK
                     .frame(maxWidth: .infinity)
                 }
-            }
+            }//: HSTACK
             
             
-        }
+        }//: VSTACK
         .padding(.horizontal)
         
     }
 }
     
-
+ // MARK: - PREVIEW
 struct MuiltyDayForecast_Previews: PreviewProvider {
     static var previews: some View {
         MuiltyDayForecast()

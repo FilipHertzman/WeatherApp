@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct WeatherView: View {
+     // MARK: - PROPERTIES
     @StateObject private var viewModel = WeatherViewModel()
 
+     // MARK: - BODY
     var body: some View {
         ZStack {
             VStack {
@@ -31,6 +33,7 @@ struct WeatherView: View {
     }
 }
 
+ // MARK: - PREVIEW
 struct WeatherView_Previews: PreviewProvider {
     static var previews: some View {
         WeatherView()

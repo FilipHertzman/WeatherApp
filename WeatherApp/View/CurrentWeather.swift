@@ -8,10 +8,14 @@
 import SwiftUI
 
 struct CurrentWeather: View {
+    // MARK: - PROPERTIES
+
     let weather: WeatherModel
     let weatherViewModel = WeatherViewModel()
-    
+
     @State private var animationOffset: CGFloat = -50
+
+    // MARK: - BODY
 
     var body: some View {
         VStack {
@@ -33,7 +37,6 @@ struct CurrentWeather: View {
                             animationOffset = 50
                         }
                     }
-                
             }
 
             Text(weather.weather.first?.description.capitalized ?? "")
@@ -50,10 +53,12 @@ struct CurrentWeather: View {
                     Text("High: \(Int(weather.main.temp_max.rounded()))°")
                         .bold()
                     Text("Low: \(Int(weather.main.temp_min.rounded()))°")
-                }
+                    
+                } //: VSTACK
                 .font(.title3)
                 .foregroundColor(.white)
-            }
+                
+            } //: HSTACK
             .padding(.bottom, 15)
             HStack {
                 VStack {
@@ -67,14 +72,18 @@ struct CurrentWeather: View {
                     Text("Wind")
                     Text("\(Int(weather.wind.speed.rounded())) m/s")
                         .bold()
-                }
+                    
+                }//: VSTACK
                 .foregroundColor(.white)
-            }
+                
+            } //: HSTACK
             .padding(.horizontal)
             .font(.title3)
-        }
+        } //: VSTACK
     }
 }
+
+// MARK: - PREVIEW
 
 // struct CurrentWeather_Previews: PreviewProvider {
 //    static var previews: some View {

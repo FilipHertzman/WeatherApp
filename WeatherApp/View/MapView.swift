@@ -9,11 +9,11 @@ import SwiftUI
 import MapKit
 
 struct MapView: View {
+     // MARK: - PROPERTIES
     
     @ObservedObject var viewModel = MapViewModel()
     
-    
-    
+     // MARK: - BODY
     var body: some View {
         Map(coordinateRegion: $viewModel.region)
             .frame(height: 200)
@@ -25,6 +25,7 @@ struct MapView: View {
     }
 }
 
+ // MARK: - PREVIEW
 struct MapView_Previews: PreviewProvider {
     static var previews: some View {
         MapView()
