@@ -7,10 +7,15 @@ This Weather App provides up-to-date weather information and showcases the curre
 ## Key Features
 
 - **User Interface:** The app's clean layout presents current weather information, including temperature, humidity, wind speed, and a brief weather description. The user interface is designed with simplicity in mind, making it easy to navigate and understand.
+
 - **Visual Weather Representation:** The app uses SF Symbols to display weather icons that represent the current weather conditions. 
+
 - **7-Day Weather Forecast:** The app provides a 7-day weather forecast.
+
 - **MapView Integration:** The app integrates a MapView to display the user's current location accurately. Leveraging the Core Location framework and MapKit, the app accurately determines and displays the user's position on the map.
+
 - **Real-Time Weather Data:** The app fetches real-time weather data from the OpenWeatherMap API. By efficiently updating the user interface using SwiftUI and Combine, users can stay informed about the latest weather conditions.
+
 - **Location Updates:** The app implements the CLLocationManagerDelegate to manage location updates. This ensures the app retrieves weather data based on the user's accurate and timely location.
 
 ## Getting Started
